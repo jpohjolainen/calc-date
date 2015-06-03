@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+__author__ = "Janne Pohjolainen"
+__copyright__ = "Copyright 2015, 420helsinki"
+__license__ = "GPL"
+__version__ = "1.0"
+
+import re
+import sys
+from datetime import datetime, timedelta
+
+def parse_date(str):
+    ret_value = None
+    error = None
+
+    try:
+        ret_value = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S")
+    except ValueError, e:
+        error = e
+
+    return ret_value, error
+
+def parse_delta(str):
+    matches = re.findall('(\d+[dhms])', str)
+
+    if not matches:
+        return None, "%s does not match format 'NNdNNhNNmNNs'" % (str)
+
+    delta = {
+        'd': 0,
+        'h': 0,
+        'm': 0,
+        's': 0,
+    }
+
+    for time in matches:
+        suffix = time[-1]
+        delta[suffix] = int(time[:-1])
+
+    ret_value = timedelta(
+        days=delta['d'],
+        hours=delta['h'],
+        minutes=delta['m'],
+        seconds=delta['s'])
+
+    return ret_value, None
+
+def calculate_date(arg1, arg2, add=True):
+    date, err = parse_date(arg1)
+    if err:
+        return None, err
+
+    delta, err = parse_delta(arg2)
+    if err:
+        return None, err
+
+    if add:
+        end_date = date + delta
+    else:
+        end_date = date - delta
+
+    return end_date.strftime("%d.%m.%Y %H:%M:%S"), None
+
+def calculate_delta(arg1, arg2):
+    date, err = parse_date(arg1)
+    if err:
+        return None, err
+
+    second_date, err = parse_date(arg2)
+    if err:
+        return None, err
+
+    if second_date > date:
+        end_date = second_date - date
+    else:
+        end_date = date - second_date
+
+    return str(end_date), None
+
+def main():
+    if len(sys.argv) < 3:
+        print "usage: %s <date> [+-<delta>|<date>]" % (sys.argv[0])
+        print """
+date    iso8601 format, e.g. 2015-06-01T09:45:53
+delta   time to count from date. Select operation with + or - followed
+        by any combination of:
+        <n>d for days,
+        <n>h for hours,
+        <n>m for minutes
+        <n>s for seconds.
+"""
+        return 1
+
+    prefix = sys.argv[2][0]
+    if prefix in ('+', '-'):
+        add=True
+        if prefix == '-':
+            add=False
+        output, err = calculate_date(sys.argv[1], sys.argv[2][1:], add)
+    else:
+        output, err = calculate_delta(sys.argv[1], sys.argv[2])
+
+    if err:
+        print err
+        return 2
+
+    print
+    print output
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
