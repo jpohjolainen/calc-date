@@ -79,7 +79,7 @@ def calculate_delta(arg1, arg2):
 
 def main():
     if len(sys.argv) < 3:
-        print "usage: %s <date> [+-<delta>|<date>]" % (sys.argv[0])
+        print "usage: %s <date> +-<delta>|<date>" % (sys.argv[0])
         print """
 date    iso8601 format, e.g. 2015-06-01T09:45:53
 delta   time to count from date. Select operation with + or - followed
