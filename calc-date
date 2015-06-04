@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__ = "Janne Pohjolainen"
 __copyright__ = "Copyright 2015, 420helsinki"
@@ -21,7 +22,7 @@ def parse_date(str):
     return ret_value, error
 
 def parse_delta(str):
-    matches = re.findall('(\d+[dhms])', str)
+    matches = re.findall(r'(\d+[dhms])', str)
 
     if not matches:
         return None, "%s does not match format 'NNdNNhNNmNNs'" % (str)
